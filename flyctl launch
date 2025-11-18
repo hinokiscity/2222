@@ -1,20 +1,10 @@
-app = "telegram-bot-2222"
-primary_region = "fra"
+app = "2222"
+primary_region = "ams"
+
+[build]
 
 [env]
-PORT = "8080"
+PYTHONUNBUFFERED = "1"
 
-[[services]]
-internal_port = 8080
-protocol = "tcp"
-
-[[services.ports]]
-handlers = ["http"]
-
-[[services.ports]]
-handlers = ["tls", "http"]
-
-[[services.tcp_checks]]
-interval = "10s"
-timeout = "2s"
-grace_period = "5s"
+[processes]
+app = "python bot.py"

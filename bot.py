@@ -4,9 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
-import os
-from flask import Flask
-import threading
+
 
 TOKEN = os.getenv("8087967837:AAFMohxcGiuqgTOEEWU8NY0MDJaF5j3ywzI")
 GROUP_ID = -1003325165006
@@ -67,3 +65,4 @@ async def main():
     await dp.start_polling(bot)
 
 asyncio.run(main())
+

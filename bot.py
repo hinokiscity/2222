@@ -1,14 +1,13 @@
 import os
+import asyncio
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.enums import ParseMode
-from aiogram.utils.markdown import hbold
-from aiogram.utils.token import TokenValidationError
 from aiogram.client.default import DefaultBotProperties
+from aiogram.utils.token import TokenValidationError
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.filters import Command
-import asyncio
 
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -20,6 +19,7 @@ bot = Bot(
     token=TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
+
 dp = Dispatcher(storage=MemoryStorage())
 
 
@@ -30,8 +30,8 @@ class Form(StatesGroup):
 
 
 @dp.message(Command("start"))
-async def start_cmd(message: types.Message, state: FSMContext):
-    await message.answer("Salom! F.I.O kiriting:")
+async def cmd_start(message: types.Message, state: FSMContext):
+    await message.answer("Salom! FIO kiriting:")
     await state.set_state(Form.fio)
 
 
@@ -57,13 +57,13 @@ async def get_video(message: types.Message, state: FSMContext):
 
     caption = (
         f"📌 <b>Yangi ishtirokchi!</b>\n"
-        f"👤 FIO: {fio}\n"
+        f"👤 F.I.O: {fio}\n"
         f"📞 Telefon: {phone}"
     )
 
     GROUP_ID = os.getenv("GROUP_ID")
     if not GROUP_ID:
-        await message.answer("⚠️ GROUP_ID env o'zgaruvchisi yo‘q!")
+        await message.answer("⚠️ GROUP_ID env yo‘q!")
         return
 
     await bot.send_video(
@@ -72,7 +72,7 @@ async def get_video(message: types.Message, state: FSMContext):
         caption=caption
     )
 
-    await message.answer("Video qabul qilindi! Rahmat!")
+    await message.answer("Video yuborildi! Rahmat!")
     await state.clear()
 
 

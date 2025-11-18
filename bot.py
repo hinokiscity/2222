@@ -1,73 +1,38 @@
 import os
+from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ParseMode
+from aiogram.utils.token import TokenValidationError
 import asyncio
-from aiogram import Bot, Dispatcher, types, F
-from aiogram.filters import Command
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.memory import MemoryStorage
 
+
+# ==== TOKENNI ENV'DAN OLAMIZ ====
 TOKEN = os.getenv("BOT_TOKEN")
 
+if TOKEN is None:
+    raise TokenValidationError("BOT_TOKEN environment variable topilmadi!")
+
+# ==== BOT VA DISPATCHER ====
+bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
+dp = Dispatcher()
 
 
-TOKEN = os.getenv("8087967837:AAFMohxcGiuqgTOEEWU8NY0MDJaF5j3ywzI")
-GROUP_ID = -1003325165006
+# ==== START COMMAND ====
+@dp.message(commands=["start"])
+async def start_cmd(message: types.Message):
+    await message.answer("Bot ishlayapti! 🚀\nXush kelibsiz!")
 
-bot = Bot(token=TOKEN)
-dp = Dispatcher(storage=MemoryStorage())
 
-# Flask dummy server
-app = Flask(__name__)
+# ==== ECHO HANDLER ====
+@dp.message()
+async def echo(message: types.Message):
+    await message.answer(message.text)
 
-@app.route("/")
-def home():
-    return "Bot is running!"
 
-def run_flask():
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-
-threading.Thread(target=run_flask).start()
-
-# FORM HOLATI
-class Form(StatesGroup):
-    fio = State()
-    phone = State()
-    video = State()
-
-@dp.message(Command("start"))
-async def start_cmd(message: types.Message, state: FSMContext):
-    await message.answer("Salom! F.I.O kiriting:")
-    await state.set_state(Form.fio)
-
-@dp.message(Form.fio)
-async def get_fio(message: types.Message, state: FSMContext):
-    await state.update_data(fio=message.text)
-    await message.answer("Telefon raqamingizni kiriting:")
-    await state.set_state(Form.phone)
-
-@dp.message(Form.phone)
-async def get_phone(message: types.Message, state: FSMContext):
-    await state.update_data(phone=message.text)
-    await message.answer("Endi videoni yuboring:")
-    await state.set_state(Form.video)
-
-@dp.message(Form.video, F.video)
-async def get_video(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    fio = data["fio"]
-    phone = data["phone"]
-    file_id = message.video.file_id
-
-    caption = f"📌 Yangi ishtirokchi!\n👤 FIO: {fio}\n📞 Telefon: {phone}"
-
-    await bot.send_video(chat_id=GROUP_ID, video=file_id, caption=caption)
-    await message.answer("Video qabul qilindi! Rahmat!")
-    await state.clear()
-
+# ==== BOTNI ISHGA TUSHIRISH ====
 async def main():
+    print("Bot ishga tushdi... 🚀")
     await dp.start_polling(bot)
 
-asyncio.run(main())
 
-
+if __name__ == "__main__":
+    asyncio.run(main())

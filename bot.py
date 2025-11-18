@@ -1,8 +1,9 @@
 import os
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
+from aiogram.client.default import DefaultBotProperties
 from aiogram.utils.token import TokenValidationError
-import asyncio
 
 
 # ==== TOKENNI ENV'DAN OLAMIZ ====
@@ -11,8 +12,13 @@ TOKEN = os.getenv("BOT_TOKEN")
 if TOKEN is None:
     raise TokenValidationError("BOT_TOKEN environment variable topilmadi!")
 
+
 # ==== BOT VA DISPATCHER ====
-bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
+
 dp = Dispatcher()
 
 
@@ -21,7 +27,7 @@ dp = Dispatcher()
 async def start_cmd(message: types.Message):
     await message.answer("Bot ishlayapti! 🚀\nXush kelibsiz!")
 
-
+    
 # ==== ECHO HANDLER ====
 @dp.message()
 async def echo(message: types.Message):

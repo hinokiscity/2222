@@ -1,9 +1,13 @@
+import os
 import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
+
+TOKEN = os.getenv("BOT_TOKEN")
+
 
 
 TOKEN = os.getenv("8087967837:AAFMohxcGiuqgTOEEWU8NY0MDJaF5j3ywzI")
@@ -65,4 +69,5 @@ async def main():
     await dp.start_polling(bot)
 
 asyncio.run(main())
+
 

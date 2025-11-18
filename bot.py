@@ -3,7 +3,6 @@ import asyncio
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
-from aiogram.utils.token import TokenValidationError
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -12,7 +11,7 @@ from aiogram.filters import Command
 
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
-    raise TokenValidationError("BOT_TOKEN environment variable is missing!")
+    raise Exception("❌ BOT_TOKEN environment variable yo‘q!")
 
 
 bot = Bot(
@@ -49,8 +48,9 @@ async def get_phone(message: types.Message, state: FSMContext):
     await state.set_state(Form.video)
 
 
-@dp.message(Form.video, F.video)
+@dp.message(Form.video, F.video.as_())
 async def get_video(message: types.Message, state: FSMContext):
+
     data = await state.get_data()
     fio = data["fio"]
     phone = data["phone"]

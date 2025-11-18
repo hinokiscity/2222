@@ -1,42 +1,83 @@
 import os
-import asyncio
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, F, types
 from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties
+from aiogram.utils.markdown import hbold
 from aiogram.utils.token import TokenValidationError
+from aiogram.client.default import DefaultBotProperties
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.filters import Command
+import asyncio
 
 
-# ==== TOKENNI ENV'DAN OLAMIZ ====
 TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    raise TokenValidationError("BOT_TOKEN environment variable is missing!")
 
-if TOKEN is None:
-    raise TokenValidationError("BOT_TOKEN environment variable topilmadi!")
 
-
-# ==== BOT VA DISPATCHER ====
 bot = Bot(
     token=TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
-
-dp = Dispatcher()
-
-
-# ==== START COMMAND ====
-@dp.message(commands=["start"])
-async def start_cmd(message: types.Message):
-    await message.answer("Bot ishlayapti! 🚀\nXush kelibsiz!")
-
-    
-# ==== ECHO HANDLER ====
-@dp.message()
-async def echo(message: types.Message):
-    await message.answer(message.text)
+dp = Dispatcher(storage=MemoryStorage())
 
 
-# ==== BOTNI ISHGA TUSHIRISH ====
+class Form(StatesGroup):
+    fio = State()
+    phone = State()
+    video = State()
+
+
+@dp.message(Command("start"))
+async def start_cmd(message: types.Message, state: FSMContext):
+    await message.answer("Salom! F.I.O kiriting:")
+    await state.set_state(Form.fio)
+
+
+@dp.message(Form.fio)
+async def get_fio(message: types.Message, state: FSMContext):
+    await state.update_data(fio=message.text)
+    await message.answer("Telefon raqamingizni kiriting:")
+    await state.set_state(Form.phone)
+
+
+@dp.message(Form.phone)
+async def get_phone(message: types.Message, state: FSMContext):
+    await state.update_data(phone=message.text)
+    await message.answer("Endi videoni yuboring:")
+    await state.set_state(Form.video)
+
+
+@dp.message(Form.video, F.video)
+async def get_video(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    fio = data["fio"]
+    phone = data["phone"]
+
+    caption = (
+        f"📌 <b>Yangi ishtirokchi!</b>\n"
+        f"👤 FIO: {fio}\n"
+        f"📞 Telefon: {phone}"
+    )
+
+    GROUP_ID = os.getenv("GROUP_ID")
+    if not GROUP_ID:
+        await message.answer("⚠️ GROUP_ID env o'zgaruvchisi yo‘q!")
+        return
+
+    await bot.send_video(
+        chat_id=int(GROUP_ID),
+        video=message.video.file_id,
+        caption=caption
+    )
+
+    await message.answer("Video qabul qilindi! Rahmat!")
+    await state.clear()
+
+
 async def main():
-    print("Bot ishga tushdi... 🚀")
+    print("Bot ishga tushdi...")
     await dp.start_polling(bot)
 
 
